@@ -1,0 +1,42 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_meeting
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: meeting_rooms_db
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/meeting_rooms_db.sql:/docker-entrypoint-initdb.d/meeting_rooms_db.sql
+
+  backend:
+    build: ./meeting-room-backend
+    container_name: spring_backend
+    restart: always
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./meeting-room-frontend
+    container_name: react_frontend
+    restart: always
+
+    depends_on:
+      - backend
+
+    ports:
+      - "5173:5173"
+
+volumes:
+  mysql_data:
